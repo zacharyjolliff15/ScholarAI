@@ -19,6 +19,12 @@ const PORT = process.env.PORT || 8787;
 const DATA_DIR = path.join(__dirname, 'data');
 const STORE_PATH = path.join(DATA_DIR, 'store.json');
 
+// --------- Model tuning knobs -----
+const MODEL = process.env.MODEL || 'gpt-4o-mini';
+const EMBED_MODEL = process.env.EMBED_MODEL || 'text-embedding-3-small';
+const TEMPERATURE = Number(process.env.TEMPERATURE || 0.2);
+const MAX_OUTPUT_TOKENS = Number(process.env.MAX_OUTPUT_TOKENS || 800);
+
 // RAG knobs
 const MAX_CHARS_PER_CHUNK  = 3000;     // slightly smaller chunks -> lower peak memory
 const CHUNK_OVERLAP        = 200;
@@ -231,6 +237,25 @@ function limitScopeChunks(scopeDocs, cap = MAX_CHUNKS_FOR_ASK) {
 
 // ---------- Routes ----------
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
+
+// open AI version endpoint ------ for quick debugging and monitoring
+app.get('/api/version', (_req, res) => {
+  res.json({
+    service: 'scholarai',
+    model: MODEL,
+    embed_model: EMBED_MODEL,
+    temperature: TEMPERATURE,
+    max_output_tokens: MAX_OUTPUT_TOKENS,
+    rag: {
+      MAX_CHARS_PER_CHUNK,
+      CHUNK_OVERLAP,
+      MAX_CHUNKS_PER_DOC,
+      MAX_CHUNKS_FOR_ASK,
+      EMBEDDING_BATCH_SIZE
+    }
+  });
+});
+
 
 app.get('/api/docs', (_req, res) => {
   const store = loadStore();
