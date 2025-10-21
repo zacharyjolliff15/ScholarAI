@@ -153,7 +153,7 @@ function extractChunksFromTxtPath(p) {
 }
 async function extractChunksFromDocxPath(p) {
   // DOCX -> mammoth returns a single string; cap aggressively, then chunk
-  const res = await mammoth.extractRawText({ path: p });
+  const res = await openai.embeddings.create({ model: EMBED_MODEL, input: batch });
   const text = (res.value || '').slice(0, MAX_TEXT_PER_FILE);
   const chunks = [];
   const buf = { value: '' };
@@ -218,7 +218,7 @@ async function embedTexts(texts, batchSize = EMBEDDING_BATCH_SIZE) {
   const out = [];
   for (let i = 0; i < texts.length; i += batchSize) {
     const batch = texts.slice(i, i + batchSize);
-    const res = await openai.embeddings.create({ model: 'text-embedding-3-small', input: batch });
+    const res = await openai.embeddings.create({ model: EMBED_MODEL, input: batch });
     for (const d of res.data) out.push(d.embedding);
   }
   return out;
@@ -342,8 +342,8 @@ app.post('/api/ask', async (req, res) => {
     const all = [];
     for (const { doc, chunks } of packs) for (const ch of chunks) all.push({ docId: doc.id, name: doc.name, chunkId: ch.id, text: ch.text });
 
-    const qEmbed = (await openai.embeddings.create({
-      model: 'text-embedding-3-small',
+      const qEmbed = (await openai.embeddings.create({
+        model: EMBED_MODEL,
       input: question
     })).data[0].embedding;
 
@@ -362,8 +362,9 @@ If the answer isn’t in the sources, say you don’t have enough information.
 Cite like [${top.map((_, i) => i + 1).join(', ')}] where relevant. Be concise and helpful.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      temperature: 0.2,
+      model: MODEL,
+      temperature: TEMPERATURE,
+      max_tokens: MAX_OUTPUT_TOKENS,
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: `QUESTION:\n${question}\n\nSOURCES:\n${contextBlocks}` }
