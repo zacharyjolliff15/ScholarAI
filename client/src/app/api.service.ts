@@ -6,6 +6,7 @@ export type DocMeta = { id: string; name: string; chunkCount: number; createdAt:
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   constructor(private http: HttpClient) {}
+  private readonly base = 'http://localhost:8787/api';
 
   health() {
     return this.http.get<{ ok: boolean }>('/api/health');
@@ -17,12 +18,19 @@ export class ApiService {
 
   upload(files: File[]) {
     const form = new FormData();
-    files.forEach(f => form.append('files', f, f.name));
-    return this.http.post<{ uploaded: DocMeta[] }>('/api/upload', form);
+    files.forEach(f => form.append('files', f)); // field name must be "files"
+    return this.http.post<{ uploaded: any[] }>(`${this.base}/upload`, form);
   }
 
   ask(question: string, docIds: string[], k = 6) {
-    return this.http.post<{ answer: string, citations: any[] }>('/api/ask', { question, docIds, k });
+    return this.http.post<{ answer: string; citations: any[] }>(
+      `${this.base}/ask`,
+      { question, docIds, k }
+    );
+  }
+
+  getDocs() {
+    return this.http.get<{ docs: any[] }>(`${this.base}/docs`);
   }
 
   summarize(docId: string) {
