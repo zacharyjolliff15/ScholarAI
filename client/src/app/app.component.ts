@@ -22,6 +22,13 @@ export class AppComponent {
   chat = signal<Msg[]>([]);
   summary = signal<string>('');
   error = signal<string>('');
+  // ---- Flashcards ----
+flashcards = signal<{ question: string; answer: string; show?: boolean }[]>([]);
+selectedFlashcardDocId = signal<string | null>(null);
+flashcardCount = signal(10);
+flashcardError = signal<string>('');
+isLoadingFlashcards = signal(false);
+
 
   constructor(private api: ApiService) {
     this.refresh();
@@ -83,6 +90,42 @@ export class AppComponent {
       error: e => this.summary.set(String(e?.error?.error || e.message))
     });
   }
+  // ---- Flashcard generation ----
+generateFlashcards() {
+  this.flashcardError.set('');
+
+  const docId = this.selectedFlashcardDocId();
+  if (!docId) {
+    this.flashcardError.set('Please select a document first.');
+    return;
+  }
+
+  this.isLoadingFlashcards.set(true);
+  this.flashcards.set([]);
+
+  this.api.generateFlashcards(docId, this.flashcardCount())
+    .subscribe({
+      next: (res) => {
+        this.flashcards.set(res.flashcards || []);
+        this.isLoadingFlashcards.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.flashcardError.set('Something went wrong.');
+        this.isLoadingFlashcards.set(false);
+      }
+    });
+}
+
+toggleFlashcard(i: number) {
+  const arr = [...this.flashcards()];
+  arr[i] = {
+    ...arr[i],
+    answer: arr[i].answer, // keep data untouched
+    show: !arr[i].show
+  };
+  this.flashcards.set(arr);
+}
 
   clear() { this.chat.set([]); this.summary.set(''); }
 }

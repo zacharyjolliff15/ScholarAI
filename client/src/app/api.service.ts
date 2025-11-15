@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 
 export type DocMeta = { id: string; name: string; chunkCount: number; createdAt: string };
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class ApiService {
   constructor(private http: HttpClient) {}
   private readonly base = 'http://localhost:8787/api';
@@ -33,7 +35,16 @@ export class ApiService {
     return this.http.get<{ docs: any[] }>(`${this.base}/docs`);
   }
 
-  summarize(docId: string) {
+    summarize(docId: string) {
     return this.http.post<{ summary: string }>('/api/summarize', { docId });
   }
+
+  generateFlashcards(docId: string, count = 10) {
+    return this.http.post<{ flashcards: { question: string; answer: string }[] }>(
+      '/api/flashcards',
+      { docId, count }
+    );
+  }
+
 }
+

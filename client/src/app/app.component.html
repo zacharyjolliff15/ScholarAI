@@ -142,6 +142,88 @@
         <strong>Error:</strong> {{ error() }}
       </div>
     </section>
+    <!-- 📘 Flashcards Section (PASTE HERE) -->
+<section class="flashcards card slide-up delay-6">
+  <div class="section-head">
+    <h2>Smart Flashcards</h2>
+  </div>
+
+  <p>Generate study flashcards from any uploaded document.</p>
+
+  <!-- Document selector -->
+  <label>
+    Document:
+    <select [ngModel]="selectedFlashcardDocId()" (ngModelChange)="selectedFlashcardDocId.set($event)">
+      <option [ngValue]="null">-- choose a document --</option>
+      <option *ngFor="let d of docs()" [ngValue]="d.id">
+        {{ d.name }}
+      </option>
+    </select>
+  </label>
+
+  <!-- Number of cards -->
+  <label style="margin-left: 1rem;">
+    Cards:
+    <input
+      type="number"
+      min="3"
+      max="20"
+      [ngModel]="flashcardCount()"
+      (ngModelChange)="flashcardCount.set($event)"
+      style="width: 4rem;"
+    />
+  </label>
+
+  <!-- Generate button -->
+  <button
+    class="btn primary lg"
+    (click)="generateFlashcards()"
+    [disabled]="isLoadingFlashcards()"
+    style="margin-left: 1rem;"
+  >
+    {{ isLoadingFlashcards() ? 'Generating…' : 'Generate Flashcards' }}
+  </button>
+
+  <!-- Error -->
+  <p *ngIf="flashcardError()" style="color:red; margin-top:0.5rem;">
+    {{ flashcardError() }}
+  </p>
+
+  <!-- Flashcard Grid -->
+  <div
+    *ngIf="flashcards().length"
+    style="
+      margin-top:1rem;
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+      gap:1rem;
+    "
+  >
+    <div
+      *ngFor="let fc of flashcards(); let i = index"
+      (click)="toggleFlashcard(i)"
+      style="
+        border:1px solid #ddd;
+        border-radius:10px;
+        padding:1rem;
+        cursor:pointer;
+        box-shadow:0 2px 4px rgba(0,0,0,0.1);
+        background:white;
+      "
+    >
+      <div *ngIf="!fc.show">
+        <strong>Q:</strong> {{ fc.question }}
+        <p style="opacity:0.6; margin-top:0.5rem;">Click to reveal answer</p>
+      </div>
+
+      <div *ngIf="fc.show">
+        <strong>A:</strong> {{ fc.answer }}
+        <p style="opacity:0.6; margin-top:0.5rem;">Click to hide answer</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- END Flashcards Section -->
 
     <footer class="foot fade-in delay-6">
       <span>ScholarAI — local demo (text-only store, embeddings on-demand)</span>

@@ -389,6 +389,55 @@ app.post('/api/summarize', async (req, res) => {
     res.status(500).json({ error: String(err?.message || err) });
   }
 });
+// Generate Smart Flashcards 
+app.post('/api/flashcards', async (req, res) => {
+  try {
+    const { docId, count = 10 } = req.body;
+
+    if (!docId) {
+      return res.status(400).json({ error: 'docId is required' });
+    }
+
+    const store = loadStore();
+    const doc = store.docs.find(d => d.id === docId);
+
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Merge text chunks
+    const text = doc.chunks.map(c => c.text).join("\n\n");
+    const truncated = text.slice(0, 12000);
+
+    const system = `
+Create ${count} study flashcards.
+Return ONLY JSON like:
+{"flashcards":[{"question":"...","answer":"..."}]}
+`.trim();
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: truncated }
+      ]
+    });
+
+    let data;
+    try {
+      data = JSON.parse(completion.choices[0].message.content);
+    } catch (err) {
+      return res.status(500).json({ error: "Invalid JSON returned by model" });
+    }
+
+    res.json({ flashcards: data.flashcards || [] });
+
+  } catch (err) {
+    console.error("Flashcards error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 
 // Global guards
