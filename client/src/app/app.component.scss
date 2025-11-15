@@ -240,3 +240,121 @@ body{
   .k-wrap{ justify-content:flex-start; }
   .btn.lg{ width:100%; justify-content:center; }
 }
+
+.file-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  margin-right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  &[data-type="pdf"] {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+  }
+
+  &[data-type="docx"] {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+  }
+
+  &[data-type="txt"] {
+    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+    color: white;
+  }
+
+  &[data-type="unknown"] {
+    background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+    color: white;
+  }
+}
+
+// Doc actions container
+.doc-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+}
+
+// Danger outline button
+.btn.danger-outline {
+  background: white;
+  color: #e74c3c;
+  border: 2px solid #e74c3c;
+  
+  &:hover {
+    background: #e74c3c;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Update doc-row to accommodate new layout
+.doc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0; // Allow text truncation
+
+  input[type="checkbox"] {
+    flex-shrink: 0;
+  }
+
+  .doc-meta {
+    flex: 1;
+    min-width: 0;
+    
+    .doc-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+// Update doc-item to use flexbox
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 2px solid #e8ecf3;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #8E2DE2;
+    box-shadow: 0 4px 12px rgba(142, 45, 226, 0.15);
+    transform: translateY(-2px);
+  }
+}

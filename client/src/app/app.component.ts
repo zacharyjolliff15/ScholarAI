@@ -84,6 +84,33 @@ export class AppComponent {
     this.selected.set(s);
   }
 
+  deleteDoc(id: string, name: string) {
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) {
+      return;
+    }
+
+    this.api.deleteDoc(id).subscribe({
+      next: () => {
+        // Remove from selected if it was selected
+        const s = new Set(this.selected());
+        s.delete(id);
+        this.selected.set(s);
+        
+        // Refresh the docs list
+        this.refresh();
+      },
+      error: e => this.error.set(String(e?.error?.error || e.message))
+    });
+  }
+
+  getFileType(filename: string): 'pdf' | 'docx' | 'txt' | 'unknown' {
+    const lower = filename.toLowerCase();
+    if (lower.endsWith('.pdf')) return 'pdf';
+    if (lower.endsWith('.docx')) return 'docx';
+    if (lower.endsWith('.txt') || lower.endsWith('.md')) return 'txt';
+    return 'unknown';
+  }
+
   ask() {
     const q = this.question().trim();
     if (!q) return;
@@ -172,7 +199,7 @@ export class AppComponent {
   }
 
   selectQuizAnswer(questionIndex: number, optionIndex: number) {
-    if (this.quizSubmitted()) return; // Don't allow changes after submission
+    if (this.quizSubmitted()) return;
     
     const questions = [...this.quizQuestions()];
     questions[questionIndex] = {
@@ -191,7 +218,6 @@ export class AppComponent {
       return;
     }
 
-    // Mark all questions as answered
     const answered = questions.map(q => ({
       ...q,
       answered: true

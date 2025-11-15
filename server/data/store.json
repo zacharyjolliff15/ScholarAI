@@ -1,34 +1,30 @@
 {
   "docs": [
     {
-      "id": "7300e347-1bc0-4971-9735-81f44cf6b1c2",
-      "name": "Syllabus_CSI4999.pdf",
-      "createdAt": "2025-10-13T21:59:36.516Z",
-      "chunkCount": 2,
-      "chunks": [
-        {
-          "id": 1,
-          "text": "computer\nhardware that could fail.\n\n• Add/Drops: The university policy will be explicitly followed. It is the stud"
-        },
-        {
-          "id": 2,
-          "text": "ed no unauthorized assistance or\ncollaboration.\n\n(b) I understand that if I am university."
-        }
-      ]
-    },
-    {
-      "id": "11c3dca5-889f-46b3-ad65-cbf483924831",
-      "name": "Milestone3.pdf",
-      "createdAt": "2025-11-13T03:03:07.231Z",
+      "id": "b1a2a087-fe26-4adf-8bc3-4730b4aacdd8",
+      "name": "CSI4350_HW4.pdf",
+      "createdAt": "2025-11-15T19:26:54.613Z",
       "chunkCount": 2,
       "chunks": [
         {
           "id": 0,
-          "text": "Milestone 3 (100 points)\nRemember that no late submissions will be accepted. Each group is allowed to request for late\nsubmission of only one of their milestones up to four hours after the deadline. After that, the\nmilestone will not be accepted.\n\nMilestone 3 submission on Moodle is due Wednesday 11/19/2025 @ 23:00, and\npresentations will take place during class on 11/12, 11/17, and 11/19 as scheduled in the\nfollowing Table.\n\n\n\ndates\n\n11/12/2025     milestone3-presentation (groups 1-4)\n\n11/17/2025     milestone3-presentation (groups 5-8)\n\n11/19/2025     milestone3-presentation (groups 9-12)\n\n\n\n\nMilestone 3 is divided into 5 parts. The first part is a report on your progress with your project\nso far. The second part is your project presentation. The third part is your updated agile project\nplan, user story template, and outline of tasks (i.e., the three spreadsheets you submitted with\nMilestone 1). The fourth part is to share your GitHub project with me (please make sure to give\nme access to the project). Finally, you will evaluate your fellow group members.\n\n\n\nReport Requirements (30 points)\nUpload a PDF document to Moodle that completes the Report Template document. Only one\nsubmission per group is required.\n\n\n\nPresentation Requirements (20 points)\nEveryone in your group will present their projects. Your presentation should be at least 25\nminutes long but no more than 30 minutes. All group members must talk for an equal amount\nof time. Your presentation should follow this outline:\n   1. Introduce everyone on the project team with your project title\n   2. Provide a brief summary of what your project does (basically remind your classmates\n      what you presented in Milestone 2)\n   3. Demo your current project functionality. You must have at least 70% of your project\n      working by this milestone.\n   4. Demo the backend and frontend code of your project that you developed so far.\n   5. Provide a brief status of what still needs to be done before Milestone 4.\n\nYou may use a PowerPoint presentation, a poster, document, or any other tool you like. Upload\nyour group’s presentation materials to Moodle (only one submission per group is required).\n\n\n\nProject Plan (20 points)\nSubmit your updated agile project plan, user story template, and outline of tasks (i.e., the three\nspreadsheets you submitted with Milestone 1). You may use a different format if you like, but\nyou must include which group mates will work on which tasks in the weeks between Milestone\n3 and Milestone 4. Only one submission per group is required.\n\n\n\nGitHub Project (20 points)\nYour project must be uploaded to GitHub and shared with me. Please make sure I have access\nto it. It is entirely up to you how to manage your branches and whether you want to make your\nrepo public or private. However, all group members must have at least 3 commits by this\nmilestone. Please note that these three commits should not be one-line changes, but rather\nreflect a meaningful contribution to the project."
+          "text": "CSI 4350: Programming Languages\n                                 Fall 2025, Homework 04\n                           Due: Monday, November 10, 11:59 pm\n\n\nGuidelines:\n      • Write your answers in the accompanying answer sheet file named \"hw04-answer-sheet.rkt\".\n      • Rename the answer sheet file to \"hw04-yourlastname.rkt\" and (replace \"yourlastname\" with\n        your real last name).\n      • Upload/submit only the renamed answer sheet file.\n\nPossible Penalties\n      • 5% of the total points for not renaming the answer sheet.\n      • Up to 10% for submitting a file that does not compile (to compile, hit the \"Run\" button from\n        the DrRacket UI when your file is open). See the answer sheet for further details.\n\nQuestion 1\nConsider the following data type that describes the kinds of movements that can be taken on a two\ndimensional surface:\n\n\n      <step> ::=    <step> <step>             \"seq-step\"\n                |   \"up\" number               \"up-step\"\n                |   \"down\" number             \"down-step\"\n                |   \"left\" number             \"left-step\"\n                |   \"right\" number            \"right-step\"\n\n\"up\", \"down\", \"left\" and \"right\" are only markers in this BNF grammar spec that help differentiate\nbetween two steps. These are not required to show up as strings in an implementation, although they\ncould. \"seq-step\", \"up-step\", \"down-step\", \"left-step\" and \"right-step\" at the end of each grammar\nproduction for <step> are symbolic names we use to identify each variant.\n\n1.a\nFor each variant of the <step> datatype you should implement the following types of functions:\n      • a constructor bearing the name of the variant. Constructors take any relevant data as parame-\n        ters and return a new value of that type variant.\n      • a predicate with the name of the variant followed by a \"?\" mark.\n      • extractors for each piece of data of the variants. e.g. we write one extractor for up, down, left,\n        right steps and two for seq-step.\n\n                                                     1\nThe signatures of the above functions are already written down in the answer sheet. A few general\nrules to keep in mind:\n\n      • constructors throw exceptions when they receive invalid input\n\n      • predicates never throw exceptions, they either return #t or #f\n\n      • extractors may throw exceptions, for example, when they receive invalid input\n\n1.b\nImplement the function:\n\n(value-o f step starting-point)\n\nInput:\nstep: a step, as defined in 1.a\nstarting-point: a point in the x,y coordinate system, represented as a two element list. Can also be\nthought of as the environment variable that we discussed in class.\n\nOutput:\nthe end-point after moving the specified number of steps\n\nExamples:\n> (value-o f (up-step 35) 0 (0 0) )\n0 (0 35)\n\n\n> (value-o f (le f t-step 35) 0 (0 0))\n0 (−35 0)\n\n\n> (value-o f (seq-step (up-step 50) (seq-step (le f t-step 20) (right-step 40))) 0 (0 0))\n0 (20 50)"
         },
         {
           "id": 1,
-          "text": ", all group members must have at least 3 commits by this\nmilestone. Please note that these three commits should not be one-line changes, but rather\nreflect a meaningful contribution to the project.\n\n\n\nGroup Evaluation Form (10 points)\nAll group members must submit a group evaluation form. The group evaluation forms will\nimpact your grade. There is no specific form, just write your assessment and upload it on\nMoodle along with other documents under Milestone3."
+          "text": "35) 0 (0 0) )\n0 (0 35)\n\n\n> (value-o f (le f t-step 35) 0 (0 0))\n0 (−35 0)\n\n\n> (value-o f (seq-step (up-step 50) (seq-step (le f t-step 20) (right-step 40))) 0 (0 0))\n0 (20 50)\n\n\n\n\n                                                    2\nQuestion 2\nYou will be using procedural representation to implement sets of numbers. The range of the set\nis fixed by the bound variable defined in the answer-sheet file. Each set is a one-argument proce-\ndure/function that takes a number as an argument and tells whether the number is in the set (that\nis, returns #t or #f). You will be implementing the singleton-set, union, intersection, di f f , f ilter,\nexists?, all?, and map-set functions. The behavior of these functions has been specified in the\nanswer-sheet file.\n\n\nExamples:\n> (de f ine singleton1 (singleton-set 1))\n> (de f ine singleton2 (singleton-set 2))\n> (de f ine singleton3 (singleton-set 3))\n> (singleton1 0)\n#f\n> (singleton1 1)\n#t\n> (de f ine u12 (union singleton1 singleton2))\n> (u12 1)\n#t\n> (u12 3)\n#f\n> (de f ine i1 (intersection u12 singleton1))\n> (i1 1)\n#t\n> (i1 3)\n#f\n> (de f ine d2 (di f f u12 singleton1))\n> (d2 1)\n#f\n> (d2 2)\n#t\n(de f ine u123 (union u12 (singleton-set 3)))\n(de f ine g2 ( f ilter (lambda (x)(>= x 2)) u123))\n> (g2 1)\n#f\n> (g2 3)\n#t\n> de f ine ms149 (map-set (lambda (x) (∗ x x)) u123))\n> (ms149 9)\n#t\n\nNote: Please ensure that you are using procedural representation as we discussed in class, using lists\nto store numbers of the sets will not get you any points\n\n\n\n                                                   3\nQuestion 3\nRe-implement the step language from Question 1 using procedural-based representation. Imple-\nment the constructors, predicates, extractors, and value-of functions. The names of the function\nhave been modified, and the proc keyword has been added at the end of the function name in the\nanswer-sheet file.\n\nNote: Please ensure that you are following the guidelines of procedural representation we discussed\nin class. A slightly modified code from your Question 1 attempt that does not follow the guidelines\nwill not be awarded any points.\n\n\n\n\n                                                4"
+        }
+      ]
+    },
+    {
+      "id": "3b8dc39a-1885-4fea-bb10-163a15ec8d80",
+      "name": "ClassNotes3.txt",
+      "createdAt": "2025-11-15T19:32:22.996Z",
+      "chunkCount": 1,
+      "chunks": [
+        {
+          "id": 0,
+          "text": "Hello"
         }
       ]
     }

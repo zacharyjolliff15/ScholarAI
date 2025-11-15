@@ -624,3 +624,28 @@ process.on('uncaughtException', (err) => console.error('uncaughtException:', err
 process.on('unhandledRejection', (reason) => console.error('unhandledRejection:', reason));
 
 app.listen(PORT, () => console.log(`ScholarAI server listening on http://localhost:${PORT}`));
+
+app.delete('/api/docs/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: 'Document ID is required' });
+    }
+
+    const store = loadStore();
+    const docIndex = store.docs.findIndex(d => d.id === id);
+    
+    if (docIndex === -1) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Remove the document from the store
+    store.docs.splice(docIndex, 1);
+    saveStore(store);
+
+    res.json({ success: true, message: 'Document deleted successfully' });
+  } catch (err) {
+    console.error('Delete route error:', err);
+    res.status(500).json({ error: String(err?.message || err) });
+  }
+});

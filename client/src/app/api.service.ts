@@ -58,4 +58,10 @@ export class ApiService {
       { docId }
     );
   }
+
+  deleteDoc(docId: string) {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.base}/docs/${docId}`
+    );
+  }
 }
