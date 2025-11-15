@@ -142,91 +142,227 @@
         <strong>Error:</strong> {{ error() }}
       </div>
     </section>
-    <!-- 📘 Flashcards Section (PASTE HERE) -->
-<section class="flashcards card slide-up delay-6">
-  <div class="section-head">
-    <h2>Smart Flashcards</h2>
-  </div>
 
-  <p>Generate study flashcards from any uploaded document.</p>
-
-  <!-- Document selector -->
-  <label>
-    Document:
-    <select [ngModel]="selectedFlashcardDocId()" (ngModelChange)="selectedFlashcardDocId.set($event)">
-      <option [ngValue]="null">-- choose a document --</option>
-      <option *ngFor="let d of docs()" [ngValue]="d.id">
-        {{ d.name }}
-      </option>
-    </select>
-  </label>
-
-  <!-- Number of cards -->
-  <label style="margin-left: 1rem;">
-    Cards:
-    <input
-      type="number"
-      min="3"
-      max="20"
-      [ngModel]="flashcardCount()"
-      (ngModelChange)="flashcardCount.set($event)"
-      style="width: 4rem;"
-    />
-  </label>
-
-  <!-- Generate button -->
-  <button
-    class="btn primary lg"
-    (click)="generateFlashcards()"
-    [disabled]="isLoadingFlashcards()"
-    style="margin-left: 1rem;"
-  >
-    {{ isLoadingFlashcards() ? 'Generating…' : 'Generate Flashcards' }}
-  </button>
-
-  <!-- Error -->
-  <p *ngIf="flashcardError()" style="color:red; margin-top:0.5rem;">
-    {{ flashcardError() }}
-  </p>
-
-  <!-- Flashcard Grid -->
-  <div
-    *ngIf="flashcards().length"
-    style="
-      margin-top:1rem;
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-      gap:1rem;
-    "
-  >
-    <div
-      *ngFor="let fc of flashcards(); let i = index"
-      (click)="toggleFlashcard(i)"
-      style="
-        border:1px solid #ddd;
-        border-radius:10px;
-        padding:1rem;
-        cursor:pointer;
-        box-shadow:0 2px 4px rgba(0,0,0,0.1);
-        background:white;
-      "
-    >
-      <div *ngIf="!fc.show">
-        <strong>Q:</strong> {{ fc.question }}
-        <p style="opacity:0.6; margin-top:0.5rem;">Click to reveal answer</p>
+    <!-- 📘 Flashcards Section -->
+    <section class="flashcards card slide-up delay-6">
+      <div class="section-head">
+        <h2>Smart Flashcards</h2>
       </div>
 
-      <div *ngIf="fc.show">
-        <strong>A:</strong> {{ fc.answer }}
-        <p style="opacity:0.6; margin-top:0.5rem;">Click to hide answer</p>
+      <p>Generate study flashcards from any uploaded document.</p>
+
+      <!-- Document selector -->
+      <label>
+        Document:
+        <select [ngModel]="selectedFlashcardDocId()" (ngModelChange)="selectedFlashcardDocId.set($event)">
+          <option [ngValue]="null">-- choose a document --</option>
+          <option *ngFor="let d of docs()" [ngValue]="d.id">
+            {{ d.name }}
+          </option>
+        </select>
+      </label>
+
+      <!-- Number of cards -->
+      <label style="margin-left: 1rem;">
+        Cards:
+        <input
+          type="number"
+          min="3"
+          max="20"
+          [ngModel]="flashcardCount()"
+          (ngModelChange)="flashcardCount.set($event)"
+          style="width: 4rem;"
+        />
+      </label>
+
+      <!-- Generate button -->
+      <button
+        class="btn primary lg"
+        (click)="generateFlashcards()"
+        [disabled]="isLoadingFlashcards()"
+        style="margin-left: 1rem;"
+      >
+        {{ isLoadingFlashcards() ? 'Generating…' : 'Generate Flashcards' }}
+      </button>
+
+      <!-- Error -->
+      <p *ngIf="flashcardError()" style="color:red; margin-top:0.5rem;">
+        {{ flashcardError() }}
+      </p>
+
+      <!-- Flashcard Grid -->
+      <div
+        *ngIf="flashcards().length"
+        style="
+          margin-top:1rem;
+          display:grid;
+          grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+          gap:1rem;
+        "
+      >
+        <div
+          *ngFor="let fc of flashcards(); let i = index"
+          (click)="toggleFlashcard(i)"
+          style="
+            border:1px solid #ddd;
+            border-radius:10px;
+            padding:1rem;
+            cursor:pointer;
+            box-shadow:0 2px 4px rgba(0,0,0,0.1);
+            background:white;
+          "
+        >
+          <div *ngIf="!fc.show">
+            <strong>Q:</strong> {{ fc.question }}
+            <p style="opacity:0.6; margin-top:0.5rem;">Click to reveal answer</p>
+          </div>
+
+          <div *ngIf="fc.show">
+            <strong>A:</strong> {{ fc.answer }}
+            <p style="opacity:0.6; margin-top:0.5rem;">Click to hide answer</p>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
-<!-- END Flashcards Section -->
+    </section>
+    <!-- END Flashcards Section -->
+
+    <!-- 📝 Quiz Section -->
+    <section class="quiz card slide-up delay-7">
+      <div class="section-head">
+        <h2>Multiple Choice Quiz</h2>
+      </div>
+
+      <p>Generate a 3-question multiple choice quiz from any uploaded document.</p>
+
+      <!-- Document selector -->
+      <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+        <label>
+          Document:
+          <select [ngModel]="selectedQuizDocId()" (ngModelChange)="selectedQuizDocId.set($event)">
+            <option [ngValue]="null">-- choose a document --</option>
+            <option *ngFor="let d of docs()" [ngValue]="d.id">
+              {{ d.name }}
+            </option>
+          </select>
+        </label>
+
+        <!-- Generate button -->
+        <button
+          class="btn primary lg"
+          (click)="generateQuiz()"
+          [disabled]="isLoadingQuiz()"
+        >
+          {{ isLoadingQuiz() ? 'Generating…' : 'Generate Quiz' }}
+        </button>
+
+        <!-- Reset button (shown after quiz is generated) -->
+        <button
+          *ngIf="quizQuestions().length"
+          class="btn ghost"
+          (click)="resetQuiz()"
+        >
+          Reset Quiz
+        </button>
+      </div>
+
+      <!-- Error -->
+      <p *ngIf="quizError()" style="color:red; margin-top:0.5rem;">
+        {{ quizError() }}
+      </p>
+
+      <!-- Quiz Questions -->
+      <div *ngIf="quizQuestions().length" style="margin-top: 2rem;">
+        <div *ngFor="let q of quizQuestions(); let qIndex = index" 
+             style="
+               margin-bottom: 2rem;
+               padding: 1.5rem;
+               border: 2px solid #e0e0e0;
+               border-radius: 12px;
+               background: white;
+             ">
+          
+          <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">
+            Question {{ qIndex + 1 }}: {{ q.question }}
+          </h3>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <label 
+              *ngFor="let option of q.options; let oIndex = index"
+              style="
+                display: flex;
+                align-items: center;
+                padding: 0.75rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+              "
+              [style.border-color]="q.selectedIndex === oIndex ? '#8E2DE2' : '#e0e0e0'"
+              [style.background-color]="
+                q.answered 
+                  ? (oIndex === q.correctIndex ? '#d4edda' : (q.selectedIndex === oIndex && oIndex !== q.correctIndex ? '#f8d7da' : 'white'))
+                  : (q.selectedIndex === oIndex ? '#f3e5f5' : 'white')
+              "
+              (click)="selectQuizAnswer(qIndex, oIndex)"
+            >
+              <input 
+                type="radio" 
+                [name]="'question-' + qIndex"
+                [checked]="q.selectedIndex === oIndex"
+                [disabled]="quizSubmitted()"
+                style="margin-right: 0.75rem;"
+              />
+              <span>{{ option }}</span>
+              
+              <!-- Show correct/incorrect indicators after submission -->
+              <span 
+                *ngIf="q.answered && oIndex === q.correctIndex"
+                style="margin-left: auto; color: #155724; font-weight: bold;"
+              >
+                ✓ Correct
+              </span>
+              <span 
+                *ngIf="q.answered && q.selectedIndex === oIndex && oIndex !== q.correctIndex"
+                style="margin-left: auto; color: #721c24; font-weight: bold;"
+              >
+                ✗ Incorrect
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit button -->
+        <div style="margin-top: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+          <button
+            *ngIf="!quizSubmitted()"
+            class="btn primary lg"
+            (click)="submitQuiz()"
+          >
+            Submit Quiz
+          </button>
+
+          <!-- Score display -->
+          <div 
+            *ngIf="quizSubmitted()" 
+            style="
+              padding: 1rem 1.5rem;
+              background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+              color: white;
+              border-radius: 8px;
+              font-size: 1.1rem;
+              font-weight: bold;
+            "
+          >
+            Your Score: {{ getQuizScore().correct }} / {{ getQuizScore().total }}
+            ({{ (getQuizScore().correct / getQuizScore().total * 100).toFixed(0) }}%)
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- END Quiz Section -->
 
     <footer class="foot fade-in delay-6">
-      <span>ScholarAI — local demo (text-only store, embeddings on-demand)</span>
+      <span>ScholarAI – local demo (text-only store, embeddings on-demand)</span>
     </footer>
   </div>
 </div>

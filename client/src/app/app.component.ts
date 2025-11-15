@@ -5,6 +5,14 @@ import { ApiService, DocMeta } from './api.service';
 
 type Msg = { role: 'user' | 'assistant'; content: string; citations?: any[] };
 
+type QuizQuestion = {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  selectedIndex?: number;
+  answered?: boolean;
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -22,13 +30,20 @@ export class AppComponent {
   chat = signal<Msg[]>([]);
   summary = signal<string>('');
   error = signal<string>('');
+  
   // ---- Flashcards ----
-flashcards = signal<{ question: string; answer: string; show?: boolean }[]>([]);
-selectedFlashcardDocId = signal<string | null>(null);
-flashcardCount = signal(10);
-flashcardError = signal<string>('');
-isLoadingFlashcards = signal(false);
+  flashcards = signal<{ question: string; answer: string; show?: boolean }[]>([]);
+  selectedFlashcardDocId = signal<string | null>(null);
+  flashcardCount = signal(10);
+  flashcardError = signal<string>('');
+  isLoadingFlashcards = signal(false);
 
+  // ---- Quiz ----
+  quizQuestions = signal<QuizQuestion[]>([]);
+  selectedQuizDocId = signal<string | null>(null);
+  quizError = signal<string>('');
+  isLoadingQuiz = signal(false);
+  quizSubmitted = signal(false);
 
   constructor(private api: ApiService) {
     this.refresh();
@@ -90,42 +105,117 @@ isLoadingFlashcards = signal(false);
       error: e => this.summary.set(String(e?.error?.error || e.message))
     });
   }
-  // ---- Flashcard generation ----
-generateFlashcards() {
-  this.flashcardError.set('');
 
-  const docId = this.selectedFlashcardDocId();
-  if (!docId) {
-    this.flashcardError.set('Please select a document first.');
-    return;
+  // ---- Flashcard generation ----
+  generateFlashcards() {
+    this.flashcardError.set('');
+
+    const docId = this.selectedFlashcardDocId();
+    if (!docId) {
+      this.flashcardError.set('Please select a document first.');
+      return;
+    }
+
+    this.isLoadingFlashcards.set(true);
+    this.flashcards.set([]);
+
+    this.api.generateFlashcards(docId, this.flashcardCount())
+      .subscribe({
+        next: (res) => {
+          this.flashcards.set(res.flashcards || []);
+          this.isLoadingFlashcards.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.flashcardError.set('Something went wrong.');
+          this.isLoadingFlashcards.set(false);
+        }
+      });
   }
 
-  this.isLoadingFlashcards.set(true);
-  this.flashcards.set([]);
+  toggleFlashcard(i: number) {
+    const arr = [...this.flashcards()];
+    arr[i] = {
+      ...arr[i],
+      answer: arr[i].answer,
+      show: !arr[i].show
+    };
+    this.flashcards.set(arr);
+  }
 
-  this.api.generateFlashcards(docId, this.flashcardCount())
-    .subscribe({
-      next: (res) => {
-        this.flashcards.set(res.flashcards || []);
-        this.isLoadingFlashcards.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.flashcardError.set('Something went wrong.');
-        this.isLoadingFlashcards.set(false);
-      }
-    });
-}
+  // ---- Quiz generation ----
+  generateQuiz() {
+    this.quizError.set('');
 
-toggleFlashcard(i: number) {
-  const arr = [...this.flashcards()];
-  arr[i] = {
-    ...arr[i],
-    answer: arr[i].answer, // keep data untouched
-    show: !arr[i].show
-  };
-  this.flashcards.set(arr);
-}
+    const docId = this.selectedQuizDocId();
+    if (!docId) {
+      this.quizError.set('Please select a document first.');
+      return;
+    }
 
-  clear() { this.chat.set([]); this.summary.set(''); }
+    this.isLoadingQuiz.set(true);
+    this.quizQuestions.set([]);
+    this.quizSubmitted.set(false);
+
+    this.api.generateQuiz(docId)
+      .subscribe({
+        next: (res) => {
+          this.quizQuestions.set(res.questions || []);
+          this.isLoadingQuiz.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.quizError.set('Something went wrong generating the quiz.');
+          this.isLoadingQuiz.set(false);
+        }
+      });
+  }
+
+  selectQuizAnswer(questionIndex: number, optionIndex: number) {
+    if (this.quizSubmitted()) return; // Don't allow changes after submission
+    
+    const questions = [...this.quizQuestions()];
+    questions[questionIndex] = {
+      ...questions[questionIndex],
+      selectedIndex: optionIndex
+    };
+    this.quizQuestions.set(questions);
+  }
+
+  submitQuiz() {
+    const questions = this.quizQuestions();
+    const allAnswered = questions.every(q => q.selectedIndex !== undefined);
+    
+    if (!allAnswered) {
+      this.quizError.set('Please answer all questions before submitting.');
+      return;
+    }
+
+    // Mark all questions as answered
+    const answered = questions.map(q => ({
+      ...q,
+      answered: true
+    }));
+    
+    this.quizQuestions.set(answered);
+    this.quizSubmitted.set(true);
+    this.quizError.set('');
+  }
+
+  resetQuiz() {
+    this.quizQuestions.set([]);
+    this.quizSubmitted.set(false);
+    this.quizError.set('');
+  }
+
+  getQuizScore(): { correct: number; total: number } {
+    const questions = this.quizQuestions();
+    const correct = questions.filter(q => q.selectedIndex === q.correctIndex).length;
+    return { correct, total: questions.length };
+  }
+
+  clear() { 
+    this.chat.set([]); 
+    this.summary.set(''); 
+  }
 }
