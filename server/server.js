@@ -476,7 +476,7 @@ app.post('/api/summarize', async (req, res) => {
     res.status(500).json({ error: String(err?.message || err) });
   }
 });
-// Generate Smart Flashcards 
+
 app.post('/api/flashcards', async (req, res) => {
   try {
     const { docId, count = 10 } = req.body;
@@ -525,6 +525,94 @@ Return ONLY JSON like:
     res.status(500).json({ error: "Server error" });
   }
 });
+
+// ============ ADD THIS QUIZ ENDPOINT RIGHT HERE ============
+// Generate Multiple Choice Quiz (3 questions)
+app.post('/api/quiz', async (req, res) => {
+  try {
+    const { docId } = req.body;
+
+    if (!docId) {
+      return res.status(400).json({ error: 'docId is required' });
+    }
+
+    const store = loadStore();
+    const doc = store.docs.find(d => d.id === docId);
+
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Merge text chunks and truncate
+    const text = doc.chunks.map(c => c.text).join("\n\n");
+    const truncated = text.slice(0, 12000);
+
+    const system = `
+Create exactly 3 multiple choice questions based on the provided text.
+Each question should have 4 options (A, B, C, D) with only one correct answer.
+Questions should test understanding of key concepts from the material.
+
+Return ONLY JSON in this exact format:
+{
+  "questions": [
+    {
+      "question": "Question text here?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctIndex": 0
+    }
+  ]
+}
+
+The correctIndex is 0-based (0 for first option, 1 for second, etc.).
+`.trim();
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: truncated }
+      ]
+    });
+
+    let data;
+    try {
+      data = JSON.parse(completion.choices[0].message.content);
+    } catch (err) {
+      return res.status(500).json({ error: "Invalid JSON returned by model" });
+    }
+
+    // Validate the response structure
+    if (!data.questions || !Array.isArray(data.questions)) {
+      return res.status(500).json({ error: "Invalid response structure from model" });
+    }
+
+    // Ensure we have exactly 3 questions
+    const questions = data.questions.slice(0, 3);
+
+    // Validate each question has the required fields
+    const validQuestions = questions.filter(q => 
+      q.question && 
+      Array.isArray(q.options) && 
+      q.options.length === 4 &&
+      typeof q.correctIndex === 'number' &&
+      q.correctIndex >= 0 &&
+      q.correctIndex < 4
+    );
+
+    if (validQuestions.length === 0) {
+      return res.status(500).json({ error: "No valid questions generated" });
+    }
+
+    res.json({ questions: validQuestions });
+
+  } catch (err) {
+    console.error("Quiz generation error:", err);
+    res.status(500).json({ error: "Server error generating quiz" });
+  }
+});
+// ============ END QUIZ ENDPOINT ============
 
 
 // Global guards

@@ -34,7 +34,7 @@ export class AppComponent {
   // ---- Flashcards ----
   flashcards = signal<{ question: string; answer: string; show?: boolean }[]>([]);
   selectedFlashcardDocId = signal<string | null>(null);
-  flashcardCount = signal(10);
+  flashcardCount = signal(3);
   flashcardError = signal<string>('');
   isLoadingFlashcards = signal(false);
 

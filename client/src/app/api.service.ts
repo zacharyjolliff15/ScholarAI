@@ -45,7 +45,7 @@ export class ApiService {
     return this.http.post<{ summary: string }>(`${this.base}/summarize`, { docId });
   }
 
-  generateFlashcards(docId: string, count = 10) {
+  generateFlashcards(docId: string, count = 3) {
     return this.http.post<{ flashcards: { question: string; answer: string }[] }>(
       `${this.base}/flashcards`,
       { docId, count }
