@@ -240,15 +240,6 @@
 
       <!-- Export flashcards to Anki -->
       <button
-        class="btn primary lg"
-        (click)="generateFlashcards()"
-        [disabled]="isLoadingFlashcards()"
-        style="margin-left: 1rem;"
-      >
-        {{ isLoadingFlashcards() ? 'Generating…' : 'Generate Flashcards' }}
-      </button>
-
-      <button
         class="btn"
         (click)="exportFlashcardsToAnki()"
         [disabled]="!flashcards().length"
