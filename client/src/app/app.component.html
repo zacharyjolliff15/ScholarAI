@@ -326,13 +326,13 @@
       <!-- Quiz Questions -->
       <div *ngIf="quizQuestions().length" style="margin-top: 2rem;">
         <div *ngFor="let q of quizQuestions(); let qIndex = index" 
-             style="
-               margin-bottom: 2rem;
-               padding: 1.5rem;
-               border: 2px solid #e0e0e0;
-               border-radius: 12px;
-               background: white;
-             ">
+              style="
+                margin-bottom: 2rem;
+                padding: 1.5rem;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                background: white;
+              ">
           
           <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">
             Question {{ qIndex + 1 }}: {{ q.question }}
@@ -413,6 +413,99 @@
       </div>
     </section>
     <!-- END Quiz Section -->
+    
+    <!-- 📚 Glossary Builder Section (NEW) -->
+    <section class="glossary card slide-up delay-8">
+      <div class="section-head">
+        <h2>Key Concept/Glossary Builder</h2>
+      </div>
+
+      <p>Automatically extract key terms and definitions from the selected document.</p>
+      
+      <!-- Document selector -->
+      <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+        <label>
+          Document:
+          <select [ngModel]="selectedGlossaryDocId()" (ngModelChange)="selectedGlossaryDocId.set($event)">
+            <option [ngValue]="null">-- choose a document --</option>
+            <option *ngFor="let d of docs()" [ngValue]="d.id">
+              {{ d.name }}
+            </option>
+          </select>
+        </label>
+
+        <!-- Generate button -->
+        <button
+          class="btn primary lg"
+          (click)="generateGlossary()"
+          [disabled]="isLoadingGlossary()"
+        >
+          {{ isLoadingGlossary() ? 'Extracting…' : 'Build Glossary' }}
+        </button>
+      </div>
+      
+      <!-- Error -->
+      <p *ngIf="glossaryError()" style="color:red; margin-top:0.5rem;">
+        {{ glossaryError() }}
+      </p>
+
+      <!-- Glossary Output -->
+      <div *ngIf="glossary().length" style="margin-top: 1.5rem; border: 1px solid #ddd; border-radius: 8px; padding: 1rem;">
+        <h4 style="margin-top: 0; margin-bottom: 1rem;">Extracted Terms ({{ glossary().length }})</h4>
+        <div *ngFor="let term of glossary()" style="margin-bottom: 0.75rem;">
+          <strong style="color: #4A00E0;">{{ term.term }}:</strong> {{ term.definition }}
+        </div>
+      </div>
+    </section>
+    <!-- END Glossary Builder Section -->
+
+    <!-- 🗓️ Learning Plan Generator Section (NEW) -->
+    <section class="learning-plan card slide-up delay-9">
+      <div class="section-head">
+        <h2>Learning Plan Generator</h2>
+      </div>
+
+      <p>Generate a structured learning path to master the content of the selected document.</p>
+      
+      <!-- Document selector -->
+      <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+        <label>
+          Document:
+          <select [ngModel]="selectedPlanDocId()" (ngModelChange)="selectedPlanDocId.set($event)">
+            <option [ngValue]="null">-- choose a document --</option>
+            <option *ngFor="let d of docs()" [ngValue]="d.id">
+              {{ d.name }}
+            </option>
+          </select>
+        </label>
+
+        <!-- Generate button -->
+        <button
+          class="btn primary lg"
+          (click)="generateLearningPlan()"
+          [disabled]="isLoadingPlan()"
+        >
+          {{ isLoadingPlan() ? 'Planning…' : 'Generate Learning Plan' }}
+        </button>
+      </div>
+      
+      <!-- Error -->
+      <p *ngIf="planError()" style="color:red; margin-top:0.5rem;">
+        {{ planError() }}
+      </p>
+
+      <!-- Learning Plan Output -->
+      <div *ngIf="learningPlan()" style="margin-top: 1.5rem; border: 1px solid #ddd; border-radius: 8px; padding: 1rem;">
+        <h3 style="margin-top: 0;">{{ learningPlan()!.planTitle }}</h3>
+        <ol style="margin-left: 1rem; padding-left: 0;">
+          <li *ngFor="let step of learningPlan()!.steps" style="margin-bottom: 1rem;">
+            <strong>Step {{ step.stepNumber }}: {{ step.title }} ({{ step.expectedTime }})</strong>
+            <p style="margin-top: 0.2rem; margin-bottom: 0;">{{ step.description }}</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+    <!-- END Learning Plan Generator Section -->
 
     <footer class="foot fade-in delay-6">
       <span>ScholarAI – local demo (text-only store, embeddings on-demand)</span>
