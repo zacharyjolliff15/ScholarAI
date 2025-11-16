@@ -238,6 +238,25 @@
         {{ isLoadingFlashcards() ? 'Generating…' : 'Generate Flashcards' }}
       </button>
 
+      <!-- Export flashcards to Anki -->
+      <button
+        class="btn primary lg"
+        (click)="generateFlashcards()"
+        [disabled]="isLoadingFlashcards()"
+        style="margin-left: 1rem;"
+      >
+        {{ isLoadingFlashcards() ? 'Generating…' : 'Generate Flashcards' }}
+      </button>
+
+      <button
+        class="btn"
+        (click)="exportFlashcardsToAnki()"
+        [disabled]="!flashcards().length"
+        style="margin-left: 0.5rem;"
+      >
+        Export to Anki (.tsv)
+      </button>
+
       <!-- Error -->
       <p *ngIf="flashcardError()" style="color:red; margin-top:0.5rem;">
         {{ flashcardError() }}
