@@ -261,6 +261,36 @@ export class MainPageComponent { // CHANGED from AppComponent
 		this.flashcards.set(arr);
 	}
 
+	// export flashcards to TSV for anki
+	exportFlashcardsToAnki() {
+		const cards = this.flashcards();
+
+		if (!cards.length) {
+			this.flashcardError.set('No flashcards exist, please generate some first');
+			return;
+		}
+
+		// TSV content format: question<TAB>answer (per line)
+		const lines = cards.map(fc => {
+			// Clean tabs/newlines so they do not break format
+			const q = (fc.question || '').replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
+      		const a = (fc.answer || '').replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
+      		return `${q}\t${a}`;
+    });
+
+		const tsv = lines.join('\n');
+		const blob = new Blob([tsv], { type: 'text/tab-separated-values;charset=utf-8' });
+		const url = URL.createObjectURL(blob);
+
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'scholarai-flashcards.tsv';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
 	// ---- Quiz generation ----
 	generateQuiz() {
 		this.quizError.set('');
