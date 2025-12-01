@@ -338,6 +338,8 @@ export class MainPageComponent { // CHANGED from AppComponent
 
 	// ---- Quiz generation ----
 	generateQuiz() {
+		this.currentQuizSource.set('doc');
+
 		this.quizError.set('');
 
 		const docId = this.selectedQuizDocId();
