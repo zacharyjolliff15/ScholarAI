@@ -289,7 +289,7 @@
     </section>
     <!-- END Flashcards Section -->
 
-    <!-- 📝 Quiz Section -->
+    <!-- Quiz Section -->
     <section class="quiz card slide-up delay-7">
       <div class="section-head">
         <h2>Multiple Choice Quiz</h2>
@@ -422,6 +422,36 @@
         </div>
       </div>
     </section>
+    <section class="quiz-history" *ngIf="quizHistory().length">
+  <h2>Quiz History</h2>
+
+  <p>Total quizzes taken: {{ quizHistory().length }}</p>
+  <p>Average score: {{ averageScore() }}%</p>
+  <p>Best score: {{ bestScore() }}%</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>When</th>
+        <th>Score</th>
+        <th>Percent</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let a of quizHistory(); let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ a.timestamp | date:'short' }}</td>
+        <td>{{ a.score }}/{{ a.total }}</td>
+        <td>{{ a.percentage }}%</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button class="btn ghost" (click)="clearQuizHistory()">
+    Clear Quiz History
+  </button>
+</section>
     <!-- END Quiz Section -->
     
     <!-- 📚 Glossary Builder Section (NEW) -->
