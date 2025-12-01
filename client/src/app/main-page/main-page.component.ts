@@ -1,11 +1,12 @@
 // src/app/main-page/main-page.component.ts
 
-import { Component, signal } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, DocMeta } from '../api.service'; 
 import { AnalysisService, GlossaryTerm, LearningPlanResponse } from '../analysis.service';
+
 
 // --- Interface Definitions for Type Safety ---
 
@@ -42,6 +43,27 @@ interface FlashcardsResponse {
 interface QuizResponse {
 	questions: QuizQuestion[];
 }
+
+// Records Interface
+interface QuizAnswerRecord {
+  	question: string;
+	options: string[];
+	correctIndex: number;
+	selectedIndex: number | undefined;
+	wasCorrect: boolean;
+}
+
+type QuizSource = 'generic';
+
+interface QuizAttempt {
+	timestamp: string;       
+	score: number;
+	total: number;
+	percentage: number;
+	source: QuizSource;
+	answers: QuizAnswerRecord[];
+}
+
 
 // Error Interface
 interface ApiError {
@@ -92,6 +114,30 @@ export class MainPageComponent { // CHANGED from AppComponent
 	learningPlan = signal<LearningPlanResponse | null>(null);
 	isLoadingPlan = signal(false);
 	planError = signal<string>('');
+
+	// track where the current quiz came from
+	currentQuizSource = signal<QuizSource>('generic');
+
+	// all past attempts in this session
+	quizHistory = signal<QuizAttempt[]>([]);
+
+	// derived stats
+	averageScore = computed(() => {
+		const history = this.quizHistory();
+		if (!history.length) return 0;
+		const totalPoints = history.reduce((sum, a) => sum + a.score, 0);
+		const totalMax = history.reduce((sum, a) => sum + a.total, 0);
+		return totalMax === 0 ? 0 : Math.round((totalPoints / totalMax) * 100);
+	});
+
+	bestScore = computed(() => {
+		const history = this.quizHistory();
+		if (!history.length) return 0;
+		return history.reduce(
+			(best, a) => Math.max(best, Math.round((a.score / a.total) * 100)),
+			0
+		);
+	});
 
 
 	constructor(
@@ -292,6 +338,8 @@ export class MainPageComponent { // CHANGED from AppComponent
 
 	// ---- Quiz generation ----
 	generateQuiz() {
+		this.currentQuizSource.set('generic');
+
 		this.quizError.set('');
 
 		const docId = this.selectedQuizDocId();
@@ -332,21 +380,55 @@ export class MainPageComponent { // CHANGED from AppComponent
 	submitQuiz() {
 		const questions = this.quizQuestions();
 		const allAnswered = questions.every(q => q.selectedIndex !== undefined);
-		
+
 		if (!allAnswered) {
 			this.quizError.set('Please answer all questions before submitting.');
 			return;
 		}
 
+		// Mark all questions as answered
 		const answered = questions.map(q => ({
 			...q,
 			answered: true
 		}));
-		
+
 		this.quizQuestions.set(answered);
 		this.quizSubmitted.set(true);
 		this.quizError.set('');
-	}
+
+		// ---- NEW: RECORD QUIZ ATTEMPT ----
+
+		let score = 0;
+		const answerRecords: QuizAnswerRecord[] = answered.map(q => {
+			const selected = q.selectedIndex;
+			const wasCorrect = selected === q.correctIndex;
+			if (wasCorrect) score++;
+
+			return {
+				question: q.question,
+				options: q.options,
+				correctIndex: q.correctIndex,
+				selectedIndex: selected,
+				wasCorrect
+			};
+		});
+
+		const total = answered.length;
+		const percentage = total ? Math.round((score / total) * 100) : 0;
+
+		const attempt: QuizAttempt = {
+			timestamp: new Date().toISOString(),
+			score,
+			total,
+			percentage,
+			source: this.currentQuizSource(),
+			answers: answerRecords
+		};
+
+		// Push into history
+		this.quizHistory.update(h => [...h, attempt]);
+		}
+
 
 	resetQuiz() {
 		this.quizQuestions.set([]);
@@ -364,4 +446,9 @@ export class MainPageComponent { // CHANGED from AppComponent
 		this.chat.set([]);	
 		this.summary.set('');	
 	}
+
+	clearQuizHistory() {
+ 		this.quizHistory.set([]);
+	}
+
 }
