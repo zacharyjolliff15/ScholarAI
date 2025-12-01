@@ -1,11 +1,12 @@
 // src/app/main-page/main-page.component.ts
 
-import { Component, signal } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, DocMeta } from '../api.service'; 
 import { AnalysisService, GlossaryTerm, LearningPlanResponse } from '../analysis.service';
+
 
 // --- Interface Definitions for Type Safety ---
 
@@ -42,6 +43,27 @@ interface FlashcardsResponse {
 interface QuizResponse {
 	questions: QuizQuestion[];
 }
+
+// Records Interface
+interface QuizAnswerRecord {
+  	question: string;
+	options: string[];
+	correctIndex: number;
+	selectedIndex: number | null;
+	wasCorrect: boolean;
+}
+
+type QuizSource = 'doc' | 'chat';
+
+interface QuizAttempt {
+	timestamp: string;       
+	score: number;
+	total: number;
+	percentage: number;
+	source: QuizSource;
+	answers: QuizAnswerRecord[];
+}
+
 
 // Error Interface
 interface ApiError {
@@ -92,6 +114,30 @@ export class MainPageComponent { // CHANGED from AppComponent
 	learningPlan = signal<LearningPlanResponse | null>(null);
 	isLoadingPlan = signal(false);
 	planError = signal<string>('');
+
+	// track where the current quiz came from
+	currentQuizSource = signal<QuizSource>('doc');
+
+	// all past attempts in this session
+	quizHistory = signal<QuizAttempt[]>([]);
+
+	// derived stats
+	averageScore = computed(() => {
+		const history = this.quizHistory();
+		if (!history.length) return 0;
+		const totalPoints = history.reduce((sum, a) => sum + a.score, 0);
+		const totalMax = history.reduce((sum, a) => sum + a.total, 0);
+		return totalMax === 0 ? 0 : Math.round((totalPoints / totalMax) * 100);
+	});
+
+	bestScore = computed(() => {
+		const history = this.quizHistory();
+		if (!history.length) return 0;
+		return history.reduce(
+			(best, a) => Math.max(best, Math.round((a.score / a.total) * 100)),
+			0
+		);
+	});
 
 
 	constructor(
