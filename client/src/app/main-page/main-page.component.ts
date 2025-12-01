@@ -49,11 +49,11 @@ interface QuizAnswerRecord {
   	question: string;
 	options: string[];
 	correctIndex: number;
-	selectedIndex: number | null;
+	selectedIndex: number | undefined;
 	wasCorrect: boolean;
 }
 
-type QuizSource = 'doc' | 'chat';
+type QuizSource = 'generic';
 
 interface QuizAttempt {
 	timestamp: string;       
@@ -116,7 +116,7 @@ export class MainPageComponent { // CHANGED from AppComponent
 	planError = signal<string>('');
 
 	// track where the current quiz came from
-	currentQuizSource = signal<QuizSource>('doc');
+	currentQuizSource = signal<QuizSource>('generic');
 
 	// all past attempts in this session
 	quizHistory = signal<QuizAttempt[]>([]);
@@ -338,7 +338,7 @@ export class MainPageComponent { // CHANGED from AppComponent
 
 	// ---- Quiz generation ----
 	generateQuiz() {
-		this.currentQuizSource.set('doc');
+		this.currentQuizSource.set('generic');
 
 		this.quizError.set('');
 
@@ -380,21 +380,55 @@ export class MainPageComponent { // CHANGED from AppComponent
 	submitQuiz() {
 		const questions = this.quizQuestions();
 		const allAnswered = questions.every(q => q.selectedIndex !== undefined);
-		
+
 		if (!allAnswered) {
 			this.quizError.set('Please answer all questions before submitting.');
 			return;
 		}
 
+		// Mark all questions as answered
 		const answered = questions.map(q => ({
 			...q,
 			answered: true
 		}));
-		
+
 		this.quizQuestions.set(answered);
 		this.quizSubmitted.set(true);
 		this.quizError.set('');
-	}
+
+		// ---- NEW: RECORD QUIZ ATTEMPT ----
+
+		let score = 0;
+		const answerRecords: QuizAnswerRecord[] = answered.map(q => {
+			const selected = q.selectedIndex;
+			const wasCorrect = selected === q.correctIndex;
+			if (wasCorrect) score++;
+
+			return {
+				question: q.question,
+				options: q.options,
+				correctIndex: q.correctIndex,
+				selectedIndex: selected,
+				wasCorrect
+			};
+		});
+
+		const total = answered.length;
+		const percentage = total ? Math.round((score / total) * 100) : 0;
+
+		const attempt: QuizAttempt = {
+			timestamp: new Date().toISOString(),
+			score,
+			total,
+			percentage,
+			source: this.currentQuizSource(),
+			answers: answerRecords
+		};
+
+		// Push into history
+		this.quizHistory.update(h => [...h, attempt]);
+		}
+
 
 	resetQuiz() {
 		this.quizQuestions.set([]);
@@ -412,4 +446,9 @@ export class MainPageComponent { // CHANGED from AppComponent
 		this.chat.set([]);	
 		this.summary.set('');	
 	}
+
+	clearQuizHistory() {
+ 		this.quizHistory.set([]);
+	}
+
 }
